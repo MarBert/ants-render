@@ -7,6 +7,7 @@ public class AntsManager : MonoBehaviour
     [SerializeField] private float minSpawnDelay;
     [SerializeField] private float maxSpawnDelay;
     [SerializeField] private float maxAntSpawnNumber;
+
     public static AntsManager instance;
     public AntController AntPrefab;
 
@@ -28,23 +29,33 @@ public class AntsManager : MonoBehaviour
 
     private void Start(){
         _shouldSpawn = true;
-        StartCoroutine(RandomSpawn());
+        //StartCoroutine(RandomSpawn());
     }
 
     private void Update(){
         if(Input.GetKeyDown(KeyCode.A)){
             EventManager.instance.OnStartTravel.Invoke();
-            Debug.Log("TRAVEL");
         }
         if(Input.GetKeyDown(KeyCode.B)){
             EventManager.instance.OnUpdateColor.Invoke();
-            Debug.Log("CHANGE");
+        }
+        if(Input.GetKeyDown(KeyCode.K)){
+            StartCoroutine(TimedSpawn(2000,300,150));
         }
     }
 
     private IEnumerator SpawnWithDelay(int quantity,float delay,int iterations){
         for(var i = 0;i<iterations;i++){
             SpawnAnts(quantity);
+            yield return new WaitForSeconds(delay);
+        }
+    }
+
+    private IEnumerator TimedSpawn(int antsToSpawn,float timeToSpawn, int burstsNumber){
+        var delay = timeToSpawn / burstsNumber;
+        var burstAnts = antsToSpawn / burstsNumber;
+        for(var i = 0;i<burstsNumber;i++){
+            SpawnAnts(burstAnts);
             yield return new WaitForSeconds(delay);
         }
     }
