@@ -4,10 +4,14 @@ using UnityEngine;
 
 public class AntsManager : MonoBehaviour
 {
+    [SerializeField] private float minSpawnDelay;
+    [SerializeField] private float maxSpawnDelay;
+    [SerializeField] private float maxAntSpawnNumber;
     public static AntsManager instance;
     public AntController AntPrefab;
 
     private List<Transform> bases;
+    private bool _shouldSpawn;
 
     private void Awake(){
         if(instance!=null){
@@ -23,7 +27,19 @@ public class AntsManager : MonoBehaviour
     }
 
     private void Start(){
-        StartCoroutine(SpawnWithDelay(15,2,5));
+        _shouldSpawn = true;
+        StartCoroutine(RandomSpawn());
+    }
+
+    private void Update(){
+        if(Input.GetKeyDown(KeyCode.A)){
+            EventManager.instance.OnStartTravel.Invoke();
+            Debug.Log("TRAVEL");
+        }
+        if(Input.GetKeyDown(KeyCode.B)){
+            EventManager.instance.OnUpdateColor.Invoke();
+            Debug.Log("CHANGE");
+        }
     }
 
     private IEnumerator SpawnWithDelay(int quantity,float delay,int iterations){
@@ -33,10 +49,21 @@ public class AntsManager : MonoBehaviour
         }
     }
 
+    private IEnumerator RandomSpawn(){
+        while(_shouldSpawn){
+            var spawnNumber = (int)Random.Range(0,maxAntSpawnNumber);
+            SpawnAnts(spawnNumber);
+            var delay = Random.Range(minSpawnDelay,maxSpawnDelay);
+            yield return new WaitForSeconds(delay);
+        }
+    }
+
     public void SpawnAnts(int quantity){
         for(var i = 0; i<quantity;i++){
             var b = GetNewBase();
-            var a = Instantiate(AntPrefab,b.position,Quaternion.Euler(0, 0, Random.Range(0,360)));
+            var scrambler = new Vector3(Random.Range(-0.3f,0.3f),Random.Range(-0.3f,0.3f),0);
+            var scrambledPosition = b.position + scrambler;
+            var a = Instantiate(AntPrefab,scrambledPosition,Quaternion.Euler(0, 0, Random.Range(0,360)));
             a.SetUp(b);
         }
     }

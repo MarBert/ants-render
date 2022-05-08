@@ -15,17 +15,37 @@ public class AntController : MonoBehaviour
     [SerializeField] private float movementSpeed;
     [SerializeField] private float rotationSpeed;
     [SerializeField] private float maxDegreeTurn;
-    [SerializeField] private float aiUpdateTimer;
+    [SerializeField] private float aiUpdateTimerMin;
+    [SerializeField] private float aiUpdateTimerMax;
     [SerializeField] private float maxDistanceFromBase;
     [SerializeField][Range(0, 100)] private float idleProbability;
+    [SerializeField][Range(0,100)] private float travelProbability;
+    [SerializeField] private Color endColor;
 
     private Animator _antAnimator;
     private AntStatus _currentStatus;
     private bool _isAlive;
-
     private bool _shouldTravel;
-
     private Transform _antBase;
+
+    private SpriteRenderer _antRenderer;
+
+    private void Start(){
+        transform.localScale = Vector3.zero;
+        _antRenderer = GetComponentInChildren<SpriteRenderer>();
+        EventManager.instance.OnStartTravel.AddListener(()=>{
+            Debug.Log("TRAVEL!");
+            var check = Random.Range(0,100);
+            if(check <= travelProbability)
+                _shouldTravel = true;
+        });
+        EventManager.instance.OnUpdateColor.AddListener(()=>{
+            Debug.Log("COLOR!");
+            var check = Random.Range(0,100);
+            if(check <= travelProbability)
+                ChangeColor(endColor);
+        });
+    }
 
     public void SetUp(Transform antBase){
         _antBase = antBase;
@@ -33,6 +53,7 @@ public class AntController : MonoBehaviour
         _isAlive = true;
         _currentStatus = AntStatus.walk;
         StartCoroutine(AiUpdate());
+        transform.DOScale(Vector3.one,.5f);
     }
 
     private void Update(){
@@ -47,7 +68,12 @@ public class AntController : MonoBehaviour
         }
     }
 
+    private void ChangeColor(Color targetColor){
+        _antRenderer.DOColor(targetColor,.5f);
+    }
+
     private IEnumerator AiUpdate(){
+        var aiUpdateTimer = Random.Range(aiUpdateTimerMin,aiUpdateTimerMax);
         while(_isAlive){
             if(_shouldTravel){
                 _currentStatus = AntStatus.travel;
@@ -87,7 +113,6 @@ public class AntController : MonoBehaviour
                 default:
                     break;
             }
-            Debug.Log(_currentStatus);
             yield return new WaitForSeconds(aiUpdateTimer);
         }
     }

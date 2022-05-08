@@ -625,7 +625,7 @@ SpriteRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: f9409327fb28b8642adfc8523c2aaceb, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -647,7 +647,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_Sprite: {fileID: 21300000, guid: b064b416edea9634abc78bddadb65acb, type: 3}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0, g: 0, b: 0, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -664,7 +664,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1832841637279681522}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 57c008f954fe54a8bb972de1018a2cb8, type: 3}
   m_Name: 
@@ -1372,7 +1372,7 @@ Animator:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1832841638646144345}
-  m_Enabled: 1
+  m_Enabled: 0
   m_Avatar: {fileID: 0}
   m_Controller: {fileID: 9100000, guid: 6b5f8be61821b2342b44408443af6291, type: 2}
   m_CullingMode: 0
@@ -1399,9 +1399,12 @@ MonoBehaviour:
   movementSpeed: 0.2
   rotationSpeed: 1
   maxDegreeTurn: 30
-  aiUpdateTimer: 2
+  aiUpdateTimerMin: 3
+  aiUpdateTimerMax: 6
   maxDistanceFromBase: 1
-  idleProbability: 30
+  idleProbability: 20
+  travelProbability: 30
+  endColor: {r: 1, g: 0.94641244, b: 0, a: 1}
 --- !u!1 &1832841638662314210
 GameObject:
   m_ObjectHideFlags: 0
