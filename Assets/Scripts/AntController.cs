@@ -7,7 +7,8 @@ enum AntStatus {
     idle,
     walk,
     backtobase,
-    travel
+    travel,
+    groupUp
 };
 
 public class AntController : MonoBehaviour
@@ -19,7 +20,7 @@ public class AntController : MonoBehaviour
     [SerializeField] private float aiUpdateTimerMax;
     [SerializeField] private float maxDistanceFromBase;
     [SerializeField][Range(0, 100)] private float idleProbability;
-    [SerializeField][Range(0,100)] private float travelProbability;
+    [SerializeField][Range(0, 100)] private float travelProbability;
     [SerializeField] private Color endColor;
 
     private Animator _antAnimator;
@@ -27,6 +28,7 @@ public class AntController : MonoBehaviour
     private bool _isAlive;
     private bool _shouldTravel;
     private Transform _antBase;
+    private Vector3 _target;
 
     private SpriteRenderer _antRenderer;
 
@@ -60,6 +62,7 @@ public class AntController : MonoBehaviour
         switch (_currentStatus){
             case AntStatus.backtobase:
             case AntStatus.travel:
+            case AntStatus.groupUp:
             case AntStatus.walk:
                 transform.position += transform.up * Time.deltaTime * movementSpeed;
                 break;
@@ -110,10 +113,32 @@ public class AntController : MonoBehaviour
                     _antAnimator.SetBool("Walking",true);
                     TurnToObject(_antBase);
                     break;
+                case AntStatus.groupUp:
+                    _antAnimator.SetBool("Walking",true);
+                    TurnToObject(_target);
+                    break;
                 default:
                     break;
             }
             yield return new WaitForSeconds(aiUpdateTimer);
+        }
+    }
+
+    private void OnTriggerEnter2D(Collider2D other){
+        var tag = other.tag;
+        switch(tag){
+            case "Avoid" :
+                var baseRot = transform.rotation.eulerAngles;
+                var targetRot = new Vector3(baseRot.x, baseRot.y, baseRot.z + 180);
+                transform.DORotate(targetRot,rotationSpeed);
+            break;
+            case "Regroup" :
+                _currentStatus = AntStatus.groupUp;
+                _target = RandomPointInBounds(other.bounds);
+                _antBase = other.transform;
+            break;
+            case "Recolor" :
+            break;
         }
     }
 
@@ -124,4 +149,20 @@ public class AntController : MonoBehaviour
         var targetRot = new Vector3(baseRot.x, baseRot.y, baseRot.z + angle);
         transform.DORotate(targetRot,rotationSpeed);
     }
+
+    private void TurnToObject(Vector3 target){
+        var turnDir = (target - transform.position).normalized;
+        float angle = Vector3.Angle(turnDir, transform.up);
+        var baseRot = transform.rotation.eulerAngles;
+        var targetRot = new Vector3(baseRot.x, baseRot.y, baseRot.z + angle);
+        transform.DORotate(targetRot,rotationSpeed);
+    }
+
+    public Vector3 RandomPointInBounds(Bounds bounds) {
+    return new Vector3(
+        Random.Range(bounds.min.x, bounds.max.x),
+        Random.Range(bounds.min.y, bounds.max.y),
+        Random.Range(bounds.min.z, bounds.max.z)
+    );
+}
 }
