@@ -29,6 +29,7 @@ public class AntController : MonoBehaviour
     private bool _shouldTravel;
     private Transform _antBase;
     private Vector3 _target;
+    private bool _inArea;
 
     private SpriteRenderer _antRenderer;
 
@@ -78,17 +79,22 @@ public class AntController : MonoBehaviour
     private IEnumerator AiUpdate(){
         var aiUpdateTimer = Random.Range(aiUpdateTimerMin,aiUpdateTimerMax);
         while(_isAlive){
-            if(_shouldTravel){
-                _currentStatus = AntStatus.travel;
-                _shouldTravel = false;
+            if(_inArea){
+                _currentStatus = AntStatus.walk;
             }
             else{
-                var dist = Vector3.Distance(transform.position,_antBase.position);
+                if(_shouldTravel){
+                    _currentStatus = AntStatus.travel;
+                    _shouldTravel = false;
+                }
+                else{
+                    var dist = Vector3.Distance(transform.position,_antBase.position);
                 if(dist > maxDistanceFromBase)
                     _currentStatus = AntStatus.backtobase;
                 else{
                     var check = Random.Range(0,100);
                     _currentStatus = check <= idleProbability ? AntStatus.idle : AntStatus.walk;
+                    }
                 }
             }
             switch (_currentStatus){
@@ -97,10 +103,11 @@ public class AntController : MonoBehaviour
                     break;
                 case AntStatus.walk:
                     _antAnimator.SetBool("Walking",true);
+                    if(!_inArea){
                     var zRot = Random.Range(-maxDegreeTurn,maxDegreeTurn);
                     var baseRot = transform.rotation.eulerAngles;
                     var targetRot = new Vector3(baseRot.x, baseRot.y, baseRot.z + zRot);
-                    transform.DORotate(targetRot,rotationSpeed);
+                    transform.DORotate(targetRot,rotationSpeed);}
                     break;
                 case AntStatus.backtobase:
                     if(_antBase!=null){
@@ -128,9 +135,10 @@ public class AntController : MonoBehaviour
         var tag = other.tag;
         switch(tag){
             case "Avoid" :
-                var baseRot = transform.rotation.eulerAngles;
-                var targetRot = new Vector3(baseRot.x, baseRot.y, baseRot.z + 180);
-                transform.DORotate(targetRot,rotationSpeed);
+                _currentStatus = AntStatus.walk;
+                var dir = (transform.position - other.transform.position).normalized;
+                TurnToDirection(dir);
+                _inArea = true;
             break;
             case "Regroup" :
                 _currentStatus = AntStatus.groupUp;
@@ -140,6 +148,18 @@ public class AntController : MonoBehaviour
             case "Recolor" :
             break;
         }
+    }
+    private void OnTriggerStay2D(Collider2D other){
+        var tag = other.tag;
+        if(tag != "Avoid") return;
+        _currentStatus = AntStatus.walk;
+        var dir = (transform.position - other.transform.position).normalized;
+        TurnToDirection(dir);
+        _inArea = true;
+    }
+
+    private void OnTriggerExit2D(Collider2D other){
+        _inArea = false;
     }
 
     private void TurnToObject(Transform target){
@@ -153,6 +173,13 @@ public class AntController : MonoBehaviour
     private void TurnToObject(Vector3 target){
         var turnDir = (target - transform.position).normalized;
         float angle = Vector3.Angle(turnDir, transform.up);
+        var baseRot = transform.rotation.eulerAngles;
+        var targetRot = new Vector3(baseRot.x, baseRot.y, baseRot.z + angle);
+        transform.DORotate(targetRot,rotationSpeed);
+    }
+
+    private void TurnToDirection(Vector3 dir){
+        float angle = Vector3.Angle(dir, transform.up);
         var baseRot = transform.rotation.eulerAngles;
         var targetRot = new Vector3(baseRot.x, baseRot.y, baseRot.z + angle);
         transform.DORotate(targetRot,rotationSpeed);

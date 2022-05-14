@@ -40,11 +40,21 @@ public class AntsManager : MonoBehaviour
             EventManager.instance.OnUpdateColor.Invoke();
         }
         if(Input.GetKeyDown(KeyCode.K)){
-            StartCoroutine(TimedSpawn(2000,300,150));
+            StartCoroutine(SpawnGroupDelayed(200,200,.5f));
+            //StartCoroutine(TimedSpawn(2000,300,150));
         }
     }
 
-    private IEnumerator SpawnWithDelay(int quantity,float delay,int iterations){
+    private IEnumerator SpawnGroupDelayed(int total,int groups,float delay){
+        if(groups>total || groups == 0) yield break;
+        var iterSpawn = (int)Mathf.Ceil(total / groups);
+        for(var i = 0;i<groups;i++){
+            SpawnAnts(iterSpawn);
+            yield return new WaitForSeconds(delay);
+        }
+    }
+
+    private IEnumerator SpawnLoopWithDelay(int quantity,float delay,int iterations){
         for(var i = 0;i<iterations;i++){
             SpawnAnts(quantity);
             yield return new WaitForSeconds(delay);
