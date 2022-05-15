@@ -14,9 +14,9 @@ public class EventManager : MonoBehaviour
 
         instance = this;
         OnStartTravel = new UnityEvent();
-        OnUpdateColor = new UnityEvent();
+        OnUpdateColor = new UnityEvent<int>();
     }
 
     public UnityEvent OnStartTravel;
-    public UnityEvent OnUpdateColor;
+    public UnityEvent<int> OnUpdateColor;
 }

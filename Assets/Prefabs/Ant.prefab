@@ -1402,9 +1402,9 @@ MonoBehaviour:
   maxDegreeTurn: 30
   aiUpdateTimerMin: 3
   aiUpdateTimerMax: 6
-  maxDistanceFromBase: 1
+  maxDistanceFromBase: 2
   idleProbability: 20
-  travelProbability: 30
+  travelProbability: 20
   endColor: {r: 1, g: 0.94641244, b: 0, a: 1}
 --- !u!61 &2554310115883209076
 BoxCollider2D:

@@ -29,7 +29,19 @@ public class AntsManager : MonoBehaviour
 
     private void Start(){
         _shouldSpawn = true;
+        StartCoroutine(UpdateColors());
         //StartCoroutine(RandomSpawn());
+    }
+
+    private IEnumerator UpdateColors(){
+        yield return new WaitForSeconds(540);
+        var delay = (15*60 - 540) / 10;
+        var prob = 8;
+        for(var i = 0;i<10;i++){
+            EventManager.instance.OnUpdateColor.Invoke(prob);
+            prob += 8;
+            yield return new WaitForSeconds(delay);
+        }
     }
 
     private void Update(){
@@ -37,12 +49,16 @@ public class AntsManager : MonoBehaviour
             EventManager.instance.OnStartTravel.Invoke();
         }
         if(Input.GetKeyDown(KeyCode.B)){
-            EventManager.instance.OnUpdateColor.Invoke();
+            EventManager.instance.OnUpdateColor.Invoke(1);
         }
         if(Input.GetKeyDown(KeyCode.K)){
             StartCoroutine(SpawnGroupDelayed(200,200,.5f));
             //StartCoroutine(TimedSpawn(2000,300,150));
         }
+    }
+
+    public void UpdateColor(int probability){
+        EventManager.instance.OnUpdateColor.Invoke(probability);
     }
 
     private IEnumerator SpawnGroupDelayed(int total,int groups,float delay){
@@ -87,6 +103,10 @@ public class AntsManager : MonoBehaviour
             var a = Instantiate(AntPrefab,scrambledPosition,Quaternion.Euler(0, 0, Random.Range(0,360)));
             a.SetUp(b);
         }
+    }
+    
+    public void SpawnAntsWithGroup(int quantity, int groups, float delay){
+        StartCoroutine(SpawnGroupDelayed(quantity,groups,delay));
     }
 
     public Transform GetNewBase(){

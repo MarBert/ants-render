@@ -36,16 +36,10 @@ public class AntController : MonoBehaviour
     private void Start(){
         transform.localScale = Vector3.zero;
         _antRenderer = GetComponentInChildren<SpriteRenderer>();
-        EventManager.instance.OnStartTravel.AddListener(()=>{
-            Debug.Log("TRAVEL!");
-            var check = Random.Range(0,100);
-            if(check <= travelProbability)
-                _shouldTravel = true;
-        });
-        EventManager.instance.OnUpdateColor.AddListener(()=>{
+        EventManager.instance.OnUpdateColor.AddListener((portion)=>{
             Debug.Log("COLOR!");
             var check = Random.Range(0,100);
-            if(check <= travelProbability)
+            if(check <= portion)
                 ChangeColor(endColor);
         });
     }
@@ -83,10 +77,9 @@ public class AntController : MonoBehaviour
                 _currentStatus = AntStatus.walk;
             }
             else{
-                if(_shouldTravel){
+                var tCheck = Random.Range(0,100);
+                if(tCheck <= travelProbability)
                     _currentStatus = AntStatus.travel;
-                    _shouldTravel = false;
-                }
                 else{
                     var dist = Vector3.Distance(transform.position,_antBase.position);
                 if(dist > maxDistanceFromBase)
