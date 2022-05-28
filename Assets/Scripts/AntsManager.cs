@@ -12,7 +12,9 @@ public class AntsManager : MonoBehaviour
     public AntController AntPrefab;
 
     private List<Transform> bases;
+    private List<Transform> groups;
     private bool _shouldSpawn;
+    private bool _spawnRed;
 
     private void Awake(){
         if(instance!=null){
@@ -25,6 +27,10 @@ public class AntsManager : MonoBehaviour
         for(var i = 0; i<transform.childCount; i++){
             bases.Add(transform.GetChild(i));
         }
+        groups = new List<Transform>();
+        foreach(var g in GameObject.FindGameObjectsWithTag("Avoid")){
+            groups.Add(g.transform);
+        }
     }
 
     private void Start(){
@@ -34,14 +40,15 @@ public class AntsManager : MonoBehaviour
     }
 
     private IEnumerator UpdateColors(){
-        yield return new WaitForSeconds(540);
-        var delay = (15*60 - 540) / 10;
+        yield return new WaitForSeconds(720);
+        var delay = (15*60 - 720) / 10;
         var prob = 8;
         for(var i = 0;i<10;i++){
             EventManager.instance.OnUpdateColor.Invoke(prob);
             prob += 8;
             yield return new WaitForSeconds(delay);
         }
+        _spawnRed = true;
     }
 
     private void Update(){
@@ -101,7 +108,7 @@ public class AntsManager : MonoBehaviour
             var scrambler = new Vector3(Random.Range(-0.3f,0.3f),Random.Range(-0.3f,0.3f),0);
             var scrambledPosition = b.position + scrambler;
             var a = Instantiate(AntPrefab,scrambledPosition,Quaternion.Euler(0, 0, Random.Range(0,360)));
-            a.SetUp(b);
+            a.SetUp(b,_spawnRed);
         }
     }
     
@@ -109,8 +116,16 @@ public class AntsManager : MonoBehaviour
         StartCoroutine(SpawnGroupDelayed(quantity,groups,delay));
     }
 
-    public Transform GetNewBase(){
-        var i = Random.Range(0,bases.Count);
-        return bases[i];
+    public Transform GetNewBase(bool isBase=true){
+        var sel = 0;
+        if(!isBase)
+            sel = Random.Range(0,2);
+        if(sel==0)
+        {
+            var i = Random.Range(0,bases.Count);
+            return bases[i];
+        }
+        var j = Random.Range(0,groups.Count);
+        return groups[j];
     }
 }

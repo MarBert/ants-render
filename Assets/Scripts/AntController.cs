@@ -44,13 +44,15 @@ public class AntController : MonoBehaviour
         });
     }
 
-    public void SetUp(Transform antBase){
+    public void SetUp(Transform antBase,bool startRed){
         _antBase = antBase;
         _antAnimator = GetComponent<Animator>();
         _isAlive = true;
         _currentStatus = AntStatus.walk;
         StartCoroutine(AiUpdate());
         transform.DOScale(Vector3.one,.5f);
+        if(startRed)
+            ChangeColor(endColor);
     }
 
     private void Update(){
@@ -109,7 +111,7 @@ public class AntController : MonoBehaviour
                     }
                     break;
                 case AntStatus.travel:
-                    _antBase = AntsManager.instance.GetNewBase();
+                    _antBase = AntsManager.instance.GetNewBase(false);
                     _antAnimator.SetBool("Walking",true);
                     TurnToObject(_antBase);
                     break;
